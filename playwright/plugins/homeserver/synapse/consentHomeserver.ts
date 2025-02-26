@@ -6,11 +6,11 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import { Fixtures } from "../../../element-web-test.ts";
+import { type Fixtures } from "../../../element-web-test.ts";
 
 export const consentHomeserver: Fixtures = {
     _homeserver: [
-        async ({ _homeserver: container, mailhog }, use) => {
+        async ({ _homeserver: container, mailpit }, use) => {
             container
                 .withCopyDirectoriesToContainer([
                     { source: "playwright/plugins/homeserver/synapse/res", target: "/data/res" },
@@ -18,7 +18,7 @@ export const consentHomeserver: Fixtures = {
                 .withConfig({
                     email: {
                         enable_notifs: false,
-                        smtp_host: "mailhog",
+                        smtp_host: "mailpit",
                         smtp_port: 1025,
                         smtp_user: "username",
                         smtp_pass: "password",

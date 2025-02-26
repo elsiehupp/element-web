@@ -13,8 +13,8 @@ import type { ISendEventResponse, EventType, MsgType } from "matrix-js-sdk/src/m
 import { test, expect } from "../../element-web-test";
 import { SettingLevel } from "../../../src/settings/SettingLevel";
 import { Layout } from "../../../src/settings/enums/Layout";
-import { Client } from "../../pages/client";
-import { ElementAppPage } from "../../pages/ElementAppPage";
+import { type Client } from "../../pages/client";
+import { type ElementAppPage } from "../../pages/ElementAppPage";
 import { Bot } from "../../pages/bot";
 
 // The avatar size used in the timeline
@@ -1195,6 +1195,7 @@ test.describe("Timeline", () => {
             });
 
             await sendImage(app.client, room.roomId, NEW_AVATAR);
+            await app.timeline.scrollToBottom();
             await expect(page.locator(".mx_MImageBody").first()).toBeVisible();
 
             // Exclude timestamp and read marker from snapshot

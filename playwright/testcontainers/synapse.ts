@@ -5,21 +5,27 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import { AbstractStartedContainer, GenericContainer, RestartOptions, StartedTestContainer, Wait } from "testcontainers";
-import { APIRequestContext, TestInfo } from "@playwright/test";
+import {
+    AbstractStartedContainer,
+    GenericContainer,
+    type RestartOptions,
+    type StartedTestContainer,
+    Wait,
+} from "testcontainers";
+import { type APIRequestContext, type TestInfo } from "@playwright/test";
 import crypto from "node:crypto";
 import * as YAML from "yaml";
 import { set } from "lodash";
 
 import { getFreePort } from "../plugins/utils/port.ts";
 import { randB64Bytes } from "../plugins/utils/rand.ts";
-import { Credentials } from "../plugins/homeserver";
+import { type Credentials } from "../plugins/homeserver";
 import { deepCopy } from "../plugins/utils/object.ts";
-import { HomeserverContainer, StartedHomeserverContainer } from "./HomeserverContainer.ts";
-import { StartedMatrixAuthenticationServiceContainer } from "./mas.ts";
-import { Api, ClientServerApi, Verb } from "../plugins/utils/api.ts";
+import { type HomeserverContainer, type StartedHomeserverContainer } from "./HomeserverContainer.ts";
+import { type StartedMatrixAuthenticationServiceContainer } from "./mas.ts";
+import { Api, ClientServerApi, type Verb } from "../plugins/utils/api.ts";
 
-const TAG = "develop@sha256:436278578c6b396d3a581f6af020edaff37dd7c3d26d20362de9e05e4a70cee8";
+const TAG = "develop@sha256:8d1c531cf6010b63142a04e1b138a60720946fa131ad404813232f02db4ce7ba";
 
 const DEFAULT_CONFIG = {
     server_name: "localhost",

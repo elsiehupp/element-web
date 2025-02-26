@@ -6,8 +6,8 @@ SPDX-License-Identifier: AGPL-3.0-only OR GPL-3.0-only OR LicenseRef-Element-Com
 Please see LICENSE files in the repository root for full details.
 */
 
-import { Page, Request } from "@playwright/test";
-import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { type Page, type Request } from "@playwright/test";
+import { GenericContainer, type StartedTestContainer, Wait } from "testcontainers";
 
 import { test as base, expect } from "../../element-web-test";
 import type { ElementAppPage } from "../../pages/ElementAppPage";
@@ -69,11 +69,6 @@ const test = base.extend<{
 });
 
 test.describe("Sliding Sync", () => {
-    test.skip(
-        ({ homeserverType }) => homeserverType === "pinecone",
-        "due to a bug in Pinecone https://github.com/element-hq/dendrite/issues/3490",
-    );
-
     const checkOrder = async (wantOrder: string[], page: Page) => {
         await expect(page.getByRole("group", { name: "Rooms" }).locator(".mx_RoomTile_title")).toHaveText(wantOrder);
     };

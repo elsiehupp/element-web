@@ -12,17 +12,17 @@ import {
     createClient,
     EventType,
     HttpApiEvent,
-    MatrixClient,
-    MatrixEvent,
-    RoomType,
+    type MatrixClient,
+    type MatrixEvent,
+    type RoomType,
     SyncState,
-    SyncStateData,
-    TimelineEvents,
+    type SyncStateData,
+    type TimelineEvents,
 } from "matrix-js-sdk/src/matrix";
-import { defer, IDeferred, QueryDict } from "matrix-js-sdk/src/utils";
+import { defer, type IDeferred, type QueryDict } from "matrix-js-sdk/src/utils";
 import { logger } from "matrix-js-sdk/src/logger";
 import { throttle } from "lodash";
-import { CryptoEvent, KeyBackupInfo } from "matrix-js-sdk/src/crypto-api";
+import { CryptoEvent, type KeyBackupInfo } from "matrix-js-sdk/src/crypto-api";
 import { TooltipProvider } from "@vector-im/compound-web";
 
 // what-input helps improve keyboard accessibility
@@ -30,9 +30,9 @@ import "what-input";
 
 import PosthogTrackers from "../../PosthogTrackers";
 import { DecryptionFailureTracker } from "../../DecryptionFailureTracker";
-import { IMatrixClientCreds, MatrixClientPeg } from "../../MatrixClientPeg";
+import { type IMatrixClientCreds, MatrixClientPeg } from "../../MatrixClientPeg";
 import PlatformPeg from "../../PlatformPeg";
-import SdkConfig, { ConfigOptions } from "../../SdkConfig";
+import SdkConfig, { type ConfigOptions } from "../../SdkConfig";
 import dis from "../../dispatcher/dispatcher";
 import Notifier from "../../Notifier";
 import Modal from "../../Modal";
@@ -43,14 +43,14 @@ import * as Lifecycle from "../../Lifecycle";
 import "../../stores/LifecycleStore";
 import "../../stores/AutoRageshakeStore";
 import PageType from "../../PageTypes";
-import createRoom, { IOpts } from "../../createRoom";
+import createRoom, { type IOpts } from "../../createRoom";
 import { _t, _td } from "../../languageHandler";
 import SettingsStore from "../../settings/SettingsStore";
 import ThemeController from "../../settings/controllers/ThemeController";
 import { startAnyRegistrationFlow } from "../../Registration";
 import ResizeNotifier from "../../utils/ResizeNotifier";
 import AutoDiscoveryUtils from "../../utils/AutoDiscoveryUtils";
-import ThemeWatcher from "../../settings/watchers/ThemeWatcher";
+import ThemeWatcher, { ThemeWatcherEvent } from "../../settings/watchers/ThemeWatcher";
 import { FontWatcher } from "../../settings/watchers/FontWatcher";
 import { storeRoomAliasInCache } from "../../RoomAliasCache";
 import ToastStore from "../../stores/ToastStore";
@@ -60,14 +60,17 @@ import LoggedInView from "./LoggedInView";
 import { Action } from "../../dispatcher/actions";
 import { hideToast as hideAnalyticsToast, showToast as showAnalyticsToast } from "../../toasts/AnalyticsToast";
 import { showToast as showNotificationsToast } from "../../toasts/DesktopNotificationsToast";
-import { OpenToTabPayload } from "../../dispatcher/payloads/OpenToTabPayload";
+import { type OpenToTabPayload } from "../../dispatcher/payloads/OpenToTabPayload";
 import ErrorDialog from "../views/dialogs/ErrorDialog";
 import {
     RoomNotificationStateStore,
     UPDATE_STATUS_INDICATOR,
 } from "../../stores/notifications/RoomNotificationStateStore";
 import { SettingLevel } from "../../settings/SettingLevel";
-import ThreepidInviteStore, { IThreepidInvite, IThreepidInviteWireFormat } from "../../stores/ThreepidInviteStore";
+import ThreepidInviteStore, {
+    type IThreepidInvite,
+    type IThreepidInviteWireFormat,
+} from "../../stores/ThreepidInviteStore";
 import { UIFeature } from "../../settings/UIFeature";
 import DialPadModal from "../views/voip/DialPadModal";
 import { showToast as showMobileGuideToast } from "../../toasts/MobileGuideToast";
@@ -97,23 +100,23 @@ import { PosthogAnalytics } from "../../PosthogAnalytics";
 import { initSentry } from "../../sentry";
 import LegacyCallHandler from "../../LegacyCallHandler";
 import { showSpaceInvite } from "../../utils/space";
-import { ButtonEvent } from "../views/elements/AccessibleButton";
-import { ActionPayload } from "../../dispatcher/payloads";
-import { SummarizedNotificationState } from "../../stores/notifications/SummarizedNotificationState";
+import { type ButtonEvent } from "../views/elements/AccessibleButton";
+import { type ActionPayload } from "../../dispatcher/payloads";
+import { type SummarizedNotificationState } from "../../stores/notifications/SummarizedNotificationState";
 import Views from "../../Views";
-import { FocusNextType, ViewRoomPayload } from "../../dispatcher/payloads/ViewRoomPayload";
-import { ViewHomePagePayload } from "../../dispatcher/payloads/ViewHomePagePayload";
-import { AfterLeaveRoomPayload } from "../../dispatcher/payloads/AfterLeaveRoomPayload";
-import { DoAfterSyncPreparedPayload } from "../../dispatcher/payloads/DoAfterSyncPreparedPayload";
-import { ViewStartChatOrReusePayload } from "../../dispatcher/payloads/ViewStartChatOrReusePayload";
+import { type FocusNextType, type ViewRoomPayload } from "../../dispatcher/payloads/ViewRoomPayload";
+import { type ViewHomePagePayload } from "../../dispatcher/payloads/ViewHomePagePayload";
+import { type AfterLeaveRoomPayload } from "../../dispatcher/payloads/AfterLeaveRoomPayload";
+import { type DoAfterSyncPreparedPayload } from "../../dispatcher/payloads/DoAfterSyncPreparedPayload";
+import { type ViewStartChatOrReusePayload } from "../../dispatcher/payloads/ViewStartChatOrReusePayload";
 import { leaveRoomBehaviour } from "../../utils/leave-behaviour";
 import { CallStore } from "../../stores/CallStore";
-import { IRoomStateEventsActionPayload } from "../../actions/MatrixActionCreators";
-import { ShowThreadPayload } from "../../dispatcher/payloads/ShowThreadPayload";
+import { type IRoomStateEventsActionPayload } from "../../actions/MatrixActionCreators";
+import { type ShowThreadPayload } from "../../dispatcher/payloads/ShowThreadPayload";
 import { RightPanelPhases } from "../../stores/right-panel/RightPanelStorePhases";
 import RightPanelStore from "../../stores/right-panel/RightPanelStore";
 import { TimelineRenderingType } from "../../contexts/RoomContext";
-import { ValidatedServerConfig } from "../../utils/ValidatedServerConfig";
+import { type ValidatedServerConfig } from "../../utils/ValidatedServerConfig";
 import { isLocalRoom } from "../../utils/localRoom/isLocalRoom";
 import { SDKContext, SdkContextClass } from "../../contexts/SDKContext";
 import { viewUserDeviceSettings } from "../../actions/handlers/viewUserDeviceSettings";
@@ -122,7 +125,7 @@ import RovingSpotlightDialog from "../views/dialogs/spotlight/SpotlightDialog";
 import { findDMForUser } from "../../utils/dm/findDMForUser";
 import { Linkify } from "../../HtmlUtils";
 import { NotificationLevel } from "../../stores/notifications/NotificationLevel";
-import { UserTab } from "../views/dialogs/UserTab";
+import { type UserTab } from "../views/dialogs/UserTab";
 import { shouldSkipSetupEncryption } from "../../utils/crypto/shouldSkipSetupEncryption";
 import { Filter } from "../views/dialogs/spotlight/Filter";
 import { checkSessionLockFree, getSessionLock } from "../../utils/SessionLock";
@@ -131,6 +134,7 @@ import { ConfirmSessionLockTheftView } from "./auth/ConfirmSessionLockTheftView"
 import { LoginSplashView } from "./auth/LoginSplashView";
 import { cleanUpDraftsIfRequired } from "../../DraftCleaner";
 import { InitialCryptoSetupStore } from "../../stores/InitialCryptoSetupStore";
+import { setTheme } from "../../theme";
 
 // legacy export
 export { default as Views } from "../../Views";
@@ -140,7 +144,7 @@ const AUTH_SCREENS = ["register", "mobile_register", "login", "forgot_password",
 // Actions that are redirected through the onboarding process prior to being
 // re-dispatched. NOTE: some actions are non-trivial and would require
 // re-factoring to be included in this list in future.
-const ONBOARDING_FLOW_STARTERS = [Action.ViewUserSettings, "view_create_chat", "view_create_room"];
+const ONBOARDING_FLOW_STARTERS = [Action.ViewUserSettings, Action.CreateChat, Action.CreateRoom];
 
 interface IScreen {
     screen: string;
@@ -463,6 +467,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         this.themeWatcher = new ThemeWatcher();
         this.fontWatcher = new FontWatcher();
         this.themeWatcher.start();
+        this.themeWatcher.on(ThemeWatcherEvent.Change, setTheme);
         this.fontWatcher.start();
 
         initSentry(SdkConfig.get("sentry"));
@@ -495,6 +500,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
     public componentWillUnmount(): void {
         Lifecycle.stopMatrixClient();
         dis.unregister(this.dispatcherRef);
+        this.themeWatcher?.off(ThemeWatcherEvent.Change, setTheme);
         this.themeWatcher?.stop();
         this.fontWatcher?.stop();
         UIStore.destroy();
@@ -610,7 +616,10 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         }
 
         // Start the onboarding process for certain actions
-        if (MatrixClientPeg.get()?.isGuest() && ONBOARDING_FLOW_STARTERS.includes(payload.action)) {
+        if (
+            MatrixClientPeg.get()?.isGuest() &&
+            ONBOARDING_FLOW_STARTERS.includes(payload.action as unknown as Action)
+        ) {
             // This will cause `payload` to be dispatched later, once a
             // sync has reached the "prepared" state. Setting a matrix ID
             // will cause a full login and sync and finally the deferred
@@ -779,7 +788,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
                 this.viewSomethingBehindModal();
                 break;
             }
-            case "view_create_room":
+            case Action.CreateRoom:
                 this.createRoom(payload.public, payload.defaultName, payload.type);
 
                 // View the welcome or home page if we need something to look at
@@ -810,7 +819,7 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
             case Action.ViewStartChatOrReuse:
                 this.chatCreateOrReuse(payload.user_id);
                 break;
-            case "view_create_chat":
+            case Action.CreateChat:
                 showStartChatInviteDialog(payload.initialText || "");
 
                 // View the welcome or home page if we need something to look at
@@ -1695,13 +1704,6 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
         if (crypto) {
             const blacklistEnabled = SettingsStore.getValueAt(SettingLevel.DEVICE, "blacklistUnverifiedDevices");
             crypto.globalBlacklistUnverifiedDevices = blacklistEnabled;
-
-            // With cross-signing enabled, we send to unknown devices
-            // without prompting. Any bad-device status the user should
-            // be aware of will be signalled through the room shield
-            // changing colour. More advanced behaviour will come once
-            // we implement more settings.
-            cli.setGlobalErrorOnUnknownDevices(false);
         }
 
         // Cannot be done in OnLoggedIn as at that point the AccountSettingsHandler doesn't yet have a client
@@ -1759,11 +1761,11 @@ export default class MatrixChat extends React.PureComponent<IProps, IState> {
             }
         } else if (screen === "new") {
             dis.dispatch({
-                action: "view_create_room",
+                action: Action.CreateRoom,
             });
         } else if (screen === "dm") {
             dis.dispatch({
-                action: "view_create_chat",
+                action: Action.CreateChat,
             });
         } else if (screen === "settings") {
             dis.fire(Action.ViewUserSettings);
